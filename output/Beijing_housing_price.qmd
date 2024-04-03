@@ -1,6 +1,5 @@
 ---
-title: "Analyzing the Factors that Determine Housing Prices in Beijing and Predict Trends in the 21st Century"
-subtitles: "The Building Structures and The Number of Living Rooms as Prime Drivers of Price Surges"
+title: "Analyzing the Factors that Determine Housing Prices in Beijing and Predicting Trends in the 21st Century: The Building Structures and The Number of Living Rooms as Prime Drivers of Price Surges"
 author: "Xincheng Zhang"
 date: today
 date-format: long
@@ -84,9 +83,9 @@ data_features <- data.frame(
   Description = c("The id of transaction", 
                   "The longitude in coordinates", 
                   "The latitude in coordinates", 
-                  "The total price", 
-                  "The average price by square", 
-                  "The square of house", 
+                  "The total price (unit is ten thousands RMB)", 
+                  "The average price by square(unit is RMB)", 
+                  "The square of house(unit is square meter)", 
                   "The number of living room", 
                   "The number of drawing room", 
                   "The number of kitchen", 
@@ -174,11 +173,10 @@ All data manipulated and presented in this report were sourced from the datasets
 The data collected and used in this article have certain limitations, which will have varying degrees of impact on the conclusions I draw based on the analysis. Since Lianjia's collection time for this data set is limited to the six years from 2011 to 2017, more data before 2010 and after 2017 cannot be obtained and added to the analysis. This limitation also illustrates the impossibility of historical analysis relative to the macro scale. Next, the original data set was missing some variables that might have yielded more significant results. This includes but is not limited to, the direction in which the apartment faces as it relates to sunlight, as well as transaction attributes that are highly relevant to policy impacts. In addition, the irrelevances of many entries in the original data will be small and lead to inaccurate model building. Specifically, part of the data in the variables "constructionTime" and "buildingType" is marked as meaningless characters such as "NaN" due to missing data. In addition, there is also a lot of data outside the normal range for the variables "price" and "totalPrice". When this data is removed, statistical models and plots will be affected.
 
 
-The source of the original data set is Lianjia Company, which is a representative real estate brokerage platform in China [@article10]. However, since Lianjia does not have professional certification in statistics, there are inevitably some inherent biases in the data set. I have no way to prove that Lianjia Company has fully provided all existing data. Further bias exists in the authenticity of the data. To be more specific, because real estate economics companies need to achieve certain performance, company personnel may hide many failure cases or fabricate some unreal success cases. Data recording may also be biased due to equipment failure or errors. These may affect the shape of our distribution
-
 # Model
 
-For this report, I tried to use a linear regression model to confirm that the location of the house, building Type, and building Structure have a linear relationship with the average price by square of the room and construct directed acyclic graph to visualize what I want to discuss and Modeled variables. This helps to clearly show the relationship I think exists between these variables.
+For this report, I tried to use a linear regression model in order to confirm that the location of the house, building Type, and building Structure have a linear relationship with the average price by the square of the room. This is because linear regression models provide coefficients that represent the relationship between independent and dependent variables. These coefficients are interpretable and suitable for building models on a single variable while fixing multiple variables.[@article11] The directed acyclic graph is constructed to visualize what I want to discuss and Model variables. This helps to clearly show the relationship between these variables.
+
 
 ```{r}
 #| message: false
@@ -197,122 +195,23 @@ plot(dag)
 ```
 
 
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model-lm1
-
-# Fit linear regression model
-lm_model <- lm(price ~ dif_cor, data = cleaned_sampled_data)
-
-# Summary of the model
-summary(lm_model)
-```
-
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model-lm1g
-# Create scatter plot with regression line
-ggplot(data = cleaned_sampled_data, aes(x = dif_cor, y = price)) +
-  geom_point(color = "blue", alpha = 0.5) +  # Adjust point color and transparency
-  geom_smooth(method = "lm", formula = y ~ x, color = "red", se = FALSE) +  # Add regression line
-  labs(x = "dif_cor", y = "Price") +
-  ggtitle("Scatter Plot of Total Price vs dif_cor") +
-  theme_minimal()  # Apply a minimal theme for better appearance
-```
-
-
-
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model-lm1r
-# calculates the residuals of the linear regression model
-residuals <- residuals(lm_model)
-
-# Create a plot of residuals vs fitted values
-plot(cleaned_sampled_data$dif_cor, residuals, 
-     xlab = "dif_cor", ylab = "Residuals",
-     main = "Residuals vs dif_cor",
-     col = "blue")
-
-# Add a horizontal line at y = 0
-abline(h = 0, col = "red")
-
-# Plot the distribution of residuals
-hist(residuals, 
-     main = "Distribution of Residuals",
-     xlab = "Residuals", ylab = "Frequency",
-     col = "lightblue", border = "black")
-```
-
-
-
 
 $$
 Y_1=\beta_0 + \beta_1X + \epsilon
 $$ {#eq-eq1}
 
-X means dif_cor
+In my first linear regression model, I study the relationship between Beijing housing prices (Price) and the distance to the center of Beijing (dif_cor) as a single variable. $Y_{1}$ represents the average price by square in different geographical locations. The unit is expressed in latitude and longitude coordinates, which means that 0.1 is equal to 11km [@article12]. $\beta_{0}$ represents intercept, which is the average price by square when the distance between the house and the center of Beijing is 0. $\beta_{1}$ represents the coefficient for the variable dif _cor. $X$ represents the value of the independent variable "dif_cor" which is equal to each observation of the straight-line distance from the center of Beijing. $\epsilon$ represents the error term. The whole linear equation can be found in [@eq-eq1]
 
 
-
-
-
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model2-g
-#| fig-cap: Prices with Different Building types
-# Fit linear regression models for each type of building
-lm_models1 <- lapply(levels(cleaned_sampled_data$buildingType), function(building_type) {
-  lm(price ~ dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingType == building_type))
-})
-
-# Create a scatter plot with regression lines for each type of building
-ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(buildingType))) +
-  geom_point(alpha = 0.7) +
-  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(group = buildingType), linetype = "solid") +
-  labs(x = "Straight-line distance from the center of Beijing", y = "Price", title = "Price vs Dif Cor by Building Type") +
-  scale_color_manual(values = c("#1f77b4", "#FFD700", "#FF1493", "#d62728")) + # Change colors here
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 16, color = "#333333"),
-    axis.title = element_text(face = "bold", size = 14, color = "#333333"),
-    axis.text = element_text(size = 12, color = "#333333"),
-    legend.title = element_blank(),
-    legend.text = element_text(size = 12, color = "#333333"),
-    panel.background = element_rect(fill = "#f0f0f0"),
-    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
-    panel.grid.minor = element_blank(),
-    legend.key = element_rect(fill = "#f0f0f0"),
-    panel.border = element_rect(color = "black", fill = NA)
-  )
-
-```
 
 $$
 Y2=\beta_{0} + \beta_{1}X + \beta_{2}L + \beta_{3}D + \epsilon
 $$ {#eq-eq2}
 
-X means dif_cor
-
-L means number of  living room 
-
-D means number of drawing room 
-
-
 
 $$
 Y3=\beta_{0}' + \beta_{1}'X+ \beta_{2}'L+ \beta_{3}'D+ \epsilon'
 $$ {#eq-eq3}
-
-
 
 
 $$
@@ -321,38 +220,9 @@ $$ {#eq-eq4}
 
 
 
+The second model is a Multiple linear regression. This model studies the relationship between different Beijing housing prices (Price) and the two variables of Beijing center distance (dif_cor) and building type (buildingType). In this model, I also added the number of Living rooms (livingRoom) and Drawing rooms (drawingRoom) as fixed variables. $Y_{2}$,$Y_{3}$,$Y_{4}$ respectively represent the tower, the combination of plate and tower, and the average price by the square of the plate. The units are expressed in latitude and longitude coordinates. $\beta_{0}$, $\beta_{0}'$, $\beta_{0}''$are the intercept coefficients for each building type, that is, when the distance between the house and the center of Beijing is 0, the average price by the square of the three different building types.$\beta_{1}$, $\beta_{1}'$, $\beta_{1}''$are the coefficients for the 'dif_cor' variable for each building type. $\beta_{2}$, $\beta_{2}'$, $\beta_{2}''$are the coefficients for the "livingRoom' variable for each building type. $\beta_{3}$, $\beta_{3}'$, $\beta_{3}''$ are the coefficients for the 'drawing room' variable for each building type. X represents the value of the independent variable "dif_cor" which is Equal to the straight-line distance between each observation and the center of Beijing. L means the fixed number of the living room and D means the fixed number of drawing room. $\epsilon$, $\epsilon'$, $\epsilon''$represents the error terms for each building type. The whole linear equation can be separately found in [@eq-eq2]/[@eq-eq3]/[@eq-eq4]
 
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model3-g
-#| fig-cap: Prices with Different Building Structure
-# Fit linear regression models for each type of building structure
-lm_models <- lapply(levels(cleaned_sampled_data$buildingStructure), function(building_structure) {
-  lm(price ~  dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingStructure == building_structure))
-})
 
-# Create a scatter plot with regression lines for each type of building structure
-ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(buildingStructure))) +
-  geom_point(alpha = 0.7) +
-  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(group = buildingStructure), linetype = "solid") +
-  labs(x = "Straight-line distance from the center of Beijing", y = "Price", title = "Price vs Dif Cor by Building Structure") +
-  scale_color_manual(values = c("#1E90FF", "#BF3EFF", "#7FFF00", "#d62728", "#9467bd", "#8c564b")) + # Adjust colors for six building structures
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 16),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(size = 12),
-    legend.title = element_blank(),
-    legend.text = element_text(size = 12),
-    panel.background = element_rect(fill = "#f0f0f0"),
-    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
-    panel.grid.minor = element_blank(),
-    legend.key = element_rect(fill = "#f0f0f0"),
-    panel.border = element_rect(color = "black", fill = NA)
-  )
-```
 
 $$
 Y5= \beta_{0}^{(1)} + \beta_{1}^{(1)}X+ \beta_{2}^{(1)}L+ \beta_{3}^{(1)}D+ \epsilon^{(1)}
@@ -366,9 +236,21 @@ $$
 Y7= \beta_{0}^{(3)} + \beta_{1}^{(3)}X + \beta_{2}^{(3)}L + \beta_{3}^{(3)}D + \epsilon^{(3)}
 $$ {#eq-eq7}
 
+
+The third model is similar to the second one and is also a Multiple linear regression. This model studies the effects of different Beijing housing prices (Price) on the two variables of Beijing center distance (dif_cor) and building structure (buildingStructure). In this model, I also added the number of Living rooms (livingRoom) and Drawing room (drawingRoom) as fixed variables to further increase the model accuracy. $Y_{5}$, $Y_{6}$, $Y_{7}$ represent the average price by the square of mixed, brick and concrete, and steel-concrete composite materials respectively. Units are consistent with other models. $\beta_{0}^{(i)}$ represents the intercept coefficient for building structure I such that i is equal to one of 2, 4, and 6, which is the average price by the square of three different building structures when the distance between the house and the center of Beijing is 0. $\beta_{1}^{(i)}$, $\beta_{2}^{(i)}$, $\beta_{3}^{(i)}$are the coefficients for the variables 'dif_cor, "livingRoom', and 'drawingRoom'respectively, for building structure i. X, L, and D all have the same as above. $\epsilon^{(i)}$ denotes the error term for building structure i. The whole linear equation can be separately found in [@eq-eq5]/[@eq-eq6]/[@eq-eq7]
+
+
 ## Features
 
+What I am interested in in the Model section is the relationship between Beijing's housing prices and geographical location, building type, and building structure, and how they are transformed into different housing prices through coefficients in a linear regression equation. But for building type (buildingType), only three of the four types exist in the randomly filtered data. There is no observation of the building type as the bungalow. This is because the bungalow is considered to be an Indian product and was popularized in the United States and other places rather than in China. [@article13] Correspondingly, for the building structure (buildingStructure) in the data set. Only half of the 6 species were collected in the sample. The reason behind this is that although wood materials such as mass timber have a high level of reducing carbon traces in nature, the solidity and non-flammability of reinforced concrete still dominate the field of building materials. [@article14] For the features of these two variables, the establishment of the model becomes more representative for the situation of Beijing.
+
 ## Model Concerns
+
+The most important factors in modeling and analyzing these relationships depend on the amount and authenticity of the housing information in the database. Since Kaggle does not have any restrictions on data extraction, I can extract the entire database, which ensures that the amount of data used to create the model meets the standard while reducing the variance of each house's data. 
+
+
+Unfortunately, there are loopholes in the authenticity of the data. Specifically, as mentioned in the Appendix, when using an influence plot to diagnose the model, it will be shown that some data have unreasonable data manifestations in the price variable. This means that I need to delete some data to ensure the accuracy of the entire linear regression equation. However, with data deletion, the overall data volume cannot meet the requirements mentioned above. This would indicate a lack of meaningfulness of the housing information in the data and reduce the credibility of the equation. These three models should benefit from a larger period in the data set, which means an increase in the amount of data that can be used to create models and represent increase in the overall data volume.
+
 
 # Results
 
@@ -626,17 +508,128 @@ ggplot(cleaned_sampled_data, aes(x = factor(elevator), y = price, color = factor
 
 ## Data and Model Findings
 
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: model-lm1g
+# Create scatter plot with regression line
+ggplot(data = cleaned_sampled_data, aes(x = dif_cor, y = price)) +
+  geom_point(color = "blue", alpha = 0.5) +  # Adjust point color and transparency
+  geom_smooth(method = "lm", formula = y ~ x, color = "red", se = FALSE) +  # Add regression line
+  labs(x = "dif_cor", y = "Price") +
+  ggtitle("Model of Price vs Location") +
+  theme_minimal()  # Apply a minimal theme for better appearance
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: model2-g
+#| fig-cap: Prices with Different Building types
+# Fit linear regression models for each type of building
+lm_models1 <- lapply(levels(cleaned_sampled_data$buildingType), function(building_type) {
+  lm(price ~ dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingType == building_type))
+})
+
+# Create a scatter plot with regression lines for each type of building
+ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(buildingType))) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(group = buildingType), linetype = "solid") +
+  labs(x = "Straight-line distance from the center of Beijing", y = "Price", title = "Price vs Dif Cor by Building Type") +
+  scale_color_manual(values = c("#1f77b4", "#FFD700", "#FF1493", "#d62728")) + # Change colors here
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, color = "#333333"),
+    axis.title = element_text(face = "bold", size = 14, color = "#333333"),
+    axis.text = element_text(size = 12, color = "#333333"),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 12, color = "#333333"),
+    panel.background = element_rect(fill = "#f0f0f0"),
+    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    legend.key = element_rect(fill = "#f0f0f0"),
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+```
+
+
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: model3-g
+#| fig-cap: Prices with Different Building Structure
+# Fit linear regression models for each type of building structure
+lm_models <- lapply(levels(cleaned_sampled_data$buildingStructure), function(building_structure) {
+  lm(price ~  dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingStructure == building_structure))
+})
+
+# Create a scatter plot with regression lines for each type of building structure
+ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(buildingStructure))) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, aes(group = buildingStructure), linetype = "solid") +
+  labs(x = "Straight-line distance from the center of Beijing", y = "Price", title = "Price vs Dif Cor by Building Structure") +
+  scale_color_manual(values = c("#1E90FF", "#BF3EFF", "#7FFF00", "#d62728", "#9467bd", "#8c564b")) + # Adjust colors for six building structures
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 12),
+    panel.background = element_rect(fill = "#f0f0f0"),
+    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    legend.key = element_rect(fill = "#f0f0f0"),
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+```
 
 
 
 
-## Weaknesses and next steps
+
+
+
+##  Bias and Weakness
+
+
+The source of the original data set is Lianjia Company, which is a representative real estate brokerage platform in China [@article10]. However, since Lianjia does not have professional certification in statistics, there are inevitably some inherent biases in the data set. I have no way to prove that Lianjia Company has fully provided all existing data. Further bias exists in the authenticity of the data. To be more specific, because real estate economics companies need to achieve certain performance, company personnel may hide many failure cases or fabricate some unreal success cases. Data recording may also be biased due to equipment failure or errors. These may affect the shape of our distribution
+
+
+
+## Next Steps
 
 
 
 \newpage
 
-\appendix
+# Appendix
+
+## Diagnosing model
+
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: model-lm1
+
+# Fit linear regression model
+lm_model <- lm(price ~ dif_cor, data = cleaned_sampled_data)
+
+# Summary of the model
+summary(lm_model)
+```
+
+
+
+
+
 
 ```{r}
 #| message: false
@@ -646,6 +639,36 @@ ggplot(cleaned_sampled_data, aes(x = factor(elevator), y = price, color = factor
 # create an influence plot for diagnosing influential cases in linear regression models
 influencePlot(lm_model)
 ```
+
+
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: model-lm1r
+# calculates the residuals of the linear regression model
+residuals <- residuals(lm_model)
+
+# Create a plot of residuals vs fitted values
+plot(cleaned_sampled_data$dif_cor, residuals, 
+     xlab = "dif_cor", ylab = "Residuals",
+     main = "Residuals vs dif_cor",
+     col = "blue")
+
+# Add a horizontal line at y = 0
+abline(h = 0, col = "red")
+
+# Plot the distribution of residuals
+hist(residuals, 
+     main = "Distribution of Residuals",
+     xlab = "Residuals", ylab = "Frequency",
+     col = "lightblue", border = "black")
+```
+
+
+
+
 
 \newpage
 
