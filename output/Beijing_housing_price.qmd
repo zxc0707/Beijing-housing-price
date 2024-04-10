@@ -254,7 +254,35 @@ Unfortunately, there are loopholes in the authenticity of the data. Specifically
 
 # Results
 
+In this section, I will analyze the first model on one variable, and illustrate it by analyzing the several values of the predictor coefficients and their results on the model and the value which they served to make predictions. I will also continue to sketch various statistical charts to show the relationship between each variable with housing prices and predict the determinants of housing price changes in Beijing in the 21st century.
+
+## Modelling Price
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+
+# Fit linear regression model
+lm_model <- lm(price ~ dif_cor, data = cleaned_sampled_data)
+
+# Summary of the model
+summary(lm_model)
+```
+
+$$
+Y_1=62330 + (-119392)*0.2 + \epsilon
+$$ {#eq-eq8}
+
+The first model predicts the price of each listing based on the distance to the center of Beijing (dif_cor) as a single variable. My results show that for the city of Beijing, (39.901996392, 116.38833178) is used as the coordinates of the city center. For every straight-line distance of one unit (110km) from the city center, the price per square meter will drop by 119392 RMB, which corresponds to $\beta_{1}$ in the equation [@eq-eq1]. The intercept of 62330 represents When the distance between this house and the center of Beijing is 0, the value of the dependent variable price per square meter (Price) is 62330. it corresponds to $\beta_{0}$ in equation [@eq-eq1]. Finally, combined with the error $\epsilon$ of each measurement, the predicted house price for each distance of the independent variable distance is obtained by $Y_{1}$. 
+
+
+Houses outside the area of Beijing will be regarded as meaningless negative numbers, so this also explains why in my model when the distance reaches a certain point, $X$ times $\beta_{1}$ will be greater than $\beta_{0}$ and turns $Y_{1}$ into a negative number. For example, when the straight-line distance between a house and the center of Beijing is about 22km, the price can be expressed by [@eq-eq8]
+
+
 ## LivingRoom and DrawingRoom & Price Interaction
+
+Regarding factors that may affect housing prices in Beijing, the impact of the number of living rooms and drawing rooms on housing prices in Beijing will be displayed in this part. Living room refers to the bedroom, which is the room generally used by residents to rest. As for the drawing room, it is the room where guests are received.
 
 ```{r}
 #| message: false
@@ -297,6 +325,9 @@ ggplot(data = average_price, aes(x = factor(livingRoom), y = price)) +
 
 ```
 
+The [@fig-fig1] describes the relationship between housing prices per square meter and the number of living rooms in Beijing. I used the dividing year (2000) between the 20th and 21st centuries to divide the histogram into two parts to facilitate the inference that this variable will affect housing prices in the future in What pattern. In this figure, the x-axis represents the independent variable number of living rooms and the y-axis represents the average price by square, in RMB. By observing the distribution of the number of living rooms before 2000, when a house has 4 living rooms, the average price per square meter is the most expensive and reaches as high as 60,000 RMB followed by a sequence with three, one, and two living rooms. The situation of 5 living rooms did not appear before 2000. On the contrary, the situation after 2000 has two different distributions. Although the situation of 4 living rooms is still the most expensive, the price of 5 living rooms is ahead of the rest and has an expensive price of 45,000 per square meter. It is worth noting that when 5 living room observations appeared in the 21st century, all the remaining cases showed a downward trend, with a decrease rate of up to 44%.
+
+
 ```{r}
 #| message: false
 #| echo: false
@@ -330,10 +361,10 @@ ggplot(data = average_price, aes(x = factor(drawingRoom), y = price)) +
         panel.grid.major = element_line(color = "#DDDDDD"),  # Adjust major grid lines
         strip.text = element_text(face = "bold", color = "#333333"))  # Adjust strip text appearance
 
-
-
-
 ```
+
+Similarly, it can be clearly observed from the upper and lower distribution [@fig-fig2] that the relationship between housing prices per square meter and the number of drawing rooms in Beijing. The x-axis and y-axis also represent the independent variable number of living rooms and the average price by square. For housing at the end of the 20th century, the price without a drawing room was more than 60,000 per square meter. The price of one and two drawing rooms is shared at about 45,000 per square meter. Similar to the situation of living rooms, houses with three drawing rooms emerged and occupied a dominant position after 2000, with an average price per square meter of 50,000. However, the situation of one and two drawing rooms was at the dividing point of 2000 Not much has changed.
+
 
 ## Construction Time & Price Interaction
 
@@ -368,9 +399,10 @@ ggplot(data = cleaned_sampled_data, aes(x = constructionTimeGroup, y = price)) +
 
 
 
-
-
 ```
+
+Different construction times can also be used as potential factors to affect housing prices in Beijing. [@fig-fig3] uses the year 2000 as the dividing line in the x-axis, and the y-axis is the price per square meter of the property, in RMB. By comparing, whether the time of construction in the 20th century and the 21st century has a significant impact on house prices. By box plot, the middle 50% of the data in the two cases are distributed under similar price brackets. The median line is at about 45,000, and the two equal halves around 2000 also show a similar price distribution.
+
 
 ## Building Type & Price Interaction
 
@@ -413,6 +445,10 @@ plot_after_2000 <- ggplot(data = after_2000, aes(x = factor(buildingType), y = p
 library(gridExtra)
 grid.arrange(plot_before_2000, plot_after_2000, ncol = 2)
 ```
+
+
+Through the database studied in this report, only three types of six categories were found in terms of building types, including tower(1), a combination of plate and tower(3), and plate(4). This part wants to use a box plot to view the distribution and determine the impact of differences in building types on prices. [@fig-fig4]The year 2000 is also used as the dividing point to analyze these three building types. The x-axis is the average price per square meter of housing, in RMB, and the y-axis uses the numbers 1/3/4 to represent different housing types respectively. By comparison, in the middle 50% of the data in the tower, a combination of plate and tower and plate have similar distribution conditions and are respectively 30000 to 55000, 35000 to 45000, and 30000 to 50000. It should be noted that in the 21st century, plate The median line of the two building types and the combination of plate and tower is similar to that in the 20th century, at 33,000 and 45,000 respectively. However, the reduction rate of the median line in the average price of tower-type buildings is 54%.
+
 
 ## Building Structure & Price Interaction
 
@@ -473,60 +509,37 @@ grid.arrange(plot_before_2000, plot_after_2000, ncol = 1)
 
 ```
 
-## Elevator & Price Interaction
+Lastly, I speculate that building structure also plays a certain role in the surge in housing prices in Beijing in the 21st century. [@fig-fig5] is a horizontal bar chart with the year 2000 as the dividing point. The x-axis is the price per square meter, and the y-axis is the building structure classification collected from the compiled data set, including five of the six categories, namely mixed (2), brick and wood (3), brick and concrete (4), steel (5) and steel-concrete composite (6). The right side of the chart uses pink from light to dark to represent the price. The darker the color, the higher the price, and vice versa. The unit is RMB. Before 2000, the data set only included four-building structure types: mixed, brick and concrete, steel and steel-concrete composite. Mixed structures occupy the main market position, with prices up to 140,000. Concrete and composite structures are basically the same, with prices up to 115,000. However, the price of buildings with mixed structures is relatively not expensive after 2000, only 63,000, corresponding to a decline rate of 55%. Composite building structures occupy a dominant position among all building types after 2000.
+
+
+# Discussion
+
+This report takes Beijing housing prices as the research background, with the theme of analyzing and predicting the factors affecting housing price changes and the housing price change trends in the 21st century compared with the 20th century. In this report, I first downloaded the database through API on Kaggle, an open data platform, and cleaned and operated the database, which was used to analyze the factors affecting the surge in housing prices in Beijing in the 21st century. By building three models, I observed linear regression with geographical location as a single independent variable and multiple linear regression that with building type and building structure as additional independent variables. The discovery of distance from the center of Beijing has a great impact on housing prices in Beijing. Then, the data is used to reflect the relationship between housing prices and five factors that have the potential to control housing prices through various types of charts. Finally, I found that the number of living rooms and building structure are the two main factors that will affect the increase in housing prices in Beijing in the future.
+
+## Model Findings
 
 ```{r}
 #| message: false
 #| echo: false
 #| warning: false
 #| label: fig-fig6
-
-# Create a scatter plot with different colors for each type of elevator
-ggplot(cleaned_sampled_data, aes(x = factor(elevator), y = price, color = factor(elevator))) +
-  geom_point(alpha = 0.7) +
-  labs(x = "Elevator", y = "Price", title = "Price vs Elevator") +
-  scale_color_manual(values = c("#FF0000", "#00FF00"), labels = c("No Elevator", "Has Elevator")) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 16),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(size = 12),
-    legend.title = element_blank(),
-    legend.text = element_text(size = 12),
-    panel.background = element_rect(fill = "#f0f0f0"),
-    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
-    panel.grid.minor = element_blank(),
-    legend.key = element_rect(fill = "#f0f0f0"),
-    panel.border = element_rect(color = "black", fill = NA),
-    panel.grid.major.x = element_line(color = "#CCCCCC", linetype = "dotted")
-  ) +
-  scale_x_discrete(labels = c("0", "1"))
-```
-
-# Discussion
-
-
-## Data and Model Findings
-
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model-lm1g
 # Create scatter plot with regression line
 ggplot(data = cleaned_sampled_data, aes(x = dif_cor, y = price)) +
   geom_point(color = "blue", alpha = 0.5) +  # Adjust point color and transparency
   geom_smooth(method = "lm", formula = y ~ x, color = "red", se = FALSE) +  # Add regression line
-  labs(x = "dif_cor", y = "Price") +
-  ggtitle("Model of Price vs Location") +
+  labs(x = "Straight-line distance from the center of Beijing", y = "Average Price per square") +
+  ggtitle("Model of Average Price vs Location") +
   theme_minimal()  # Apply a minimal theme for better appearance
 ```
+
+[@fig-fig6] shows the first model rendering linear regression. The first model mainly studies the impact of different geographical locations on housing prices in Beijing. The x-axis represents the straight-line distance from the center of Beijing as a single independent variable, and the y-axis represents the price in RMB. The summary of the data for this model tells me that the slope of this model is -119392 in the beginning of Result part, which is a large number in absolute terms. This shows that for every unit farther away from the center of Beijing, that is, 110km, the house price per square meter will drop by 119,392. But for this model, because the intercept is only 62,330, this also shows that Lianjia company set the price of houses that are outside Beijing to meaningless negative prices. The housing price prediction equation of this model is [@eq-eq1]. I found that for the city of Beijing, the farther the straight line distance from the coordinates of the center of Beijing is, the price will decrease by 11939.2 RMB every 11km away. vice versa. This factor is driving a surge in housing prices around central Beijing.
+
 
 ```{r}
 #| message: false
 #| echo: false
 #| warning: false
-#| label: model2-g
+#| label: fig-fig7
 #| fig-cap: Prices with Different Building types
 # Fit linear regression models for each type of building
 lm_models1 <- lapply(levels(cleaned_sampled_data$buildingType), function(building_type) {
@@ -561,7 +574,7 @@ ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(building
 #| message: false
 #| echo: false
 #| warning: false
-#| label: model3-g
+#| label: fig-fig8
 #| fig-cap: Prices with Different Building Structure
 # Fit linear regression models for each type of building structure
 lm_models <- lapply(levels(cleaned_sampled_data$buildingStructure), function(building_structure) {
@@ -589,11 +602,51 @@ ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(building
   )
 ```
 
+For linear regression graphs [@fig-fig7] and [@fig-fig8] represent the second and third types of multiple linear regression respectively. I established corresponding linear regression models for the three situations of building type and building structure for comparative analysis while keeping the x-axis and y-axis no different from the first model. For the three building types represented by the second model, including tower(1), a combination of plate and tower(3), and plate(4). [@fig-fig7] shows that the slopes are all negative and the largest difference in absolute value is the combination of plate and tower and plate, which shows that under the difference of geographical location, the plate is easier to live in than the combination of plate and tower. Prices are affected. The impact of distance on the Tower housing type is similar to that of the Plate type. I found that for all building types, the price per square meter tends to decrease the further away from the center of Beijing. The predicted price equation of this model is [@eq-eq2], and can be changed by changing $\beta_{0}$, $\beta_{1}$, $\beta_{2}$, $\beta_{3}$ way using linear regression equations for each building type.
+
+Besides, for the three building structures represented by the third model, mixed (2), brick and concrete (4), and steel-concrete composite (6). [@fig-fig8] shows that the slopes are also negative and when taking After comparing absolute values, the biggest gap is between brick and concrete and steel-concrete composite, which shows that the price per square meter of brick and concrete building structures is more sensitive than steel-concrete composite structures due to differences in geographical location. Mixed has a similar situation to brick and concrete. The equation of the third model is [@eq-eq5], and can be changed by changing $\beta_{0}$, $\beta_{1}$, $\beta_{2}$, $\beta_{3}$ way using linear regression equations for each building structure. I found that for all building structures, the price per square meter tends to decrease when the distance is further away from the center of Beijing, and this trend is stronger than the second one regarding building types because of the higher slope in absolute value. This conclusion also supports the prediction judgment of the first model.
+
+
+## Graph Findings
+
+In addition to the geographical location mentioned in the model part as a factor affecting housing prices in Beijing, other factors can also be confirmed to be related to the growth of housing prices through the statistical chart analysis for the Result part.
+
+As for whether the number of room types has a direct impact on the price, I analyzed the number of living rooms and the number of drawing rooms through histograms.[@fig-fig1] provides information about the five quantities of each observed living room before and after 2000 and their corresponding prices per square meter, in RMB. Because the situation of 5 living rooms did not exist before 2000, and after 2000, the emergence of this new situation caused the number of living rooms in the remaining 4 situations to have a large price reduction rate, up to 44%. This shows that when there are 5 living rooms in the 21st-century listings, the prices of the remaining listings will drop due to reduced interest from the public. In addition, since when 2000 is used as the year of division, the situation of 5 living rooms is in the second position in all cases and is only less than 5,000 different from the first place of 4 living rooms. Through analysis, I predict that the situation of 5 living rooms in Beijing will be more dominant in housing price changes. On the contrary, the drawing room is mainly used to welcome guests, although the three drawing rooms only emerged after 2000. However, by analyzing [@fig-fig2], the occurrence of this unprecedented situation did not have a great impact on the prices corresponding to other situations, which illustrates that Beijing housing prices are relatively less sensitive to the number of drawing rooms. By horizontally comparing the price impact of new situations that existed after 2000 with other situations that had occurred before 2000, Beijing housing prices are more sensitive to the number of living rooms than the number of drawing rooms.
+
+Next, I also explored the impact of the housing construction time on the price per square meter through a box plot. [@fig-fig3] There is no big price difference between boxes before 2000 and after 2000, that is, the middle 50% of the data. The median line around 45,000 also tells me that there isn’t a huge difference in price when dividing all listing observations into the top 50% and the bottom 50% in both cases. This shows that the ability of houses built before 2000 or after 2000 to determine housing prices in Beijing is not significant.
 
 
 
 
+## The Role of Elevator
 
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-fig9
+
+# Create a scatter plot with different colors for each type of elevator
+ggplot(cleaned_sampled_data, aes(x = factor(elevator), y = price, color = factor(elevator))) +
+  geom_point(alpha = 0.7) +
+  labs(x = "Elevator", y = "Price", title = "Price vs Elevator") +
+  scale_color_manual(values = c("#FF0000", "#00FF00"), labels = c("No Elevator", "Has Elevator")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 12),
+    panel.background = element_rect(fill = "#f0f0f0"),
+    panel.grid.major = element_line(color = "#CCCCCC", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    legend.key = element_rect(fill = "#f0f0f0"),
+    panel.border = element_rect(color = "black", fill = NA),
+    panel.grid.major.x = element_line(color = "#CCCCCC", linetype = "dotted")
+  ) +
+  scale_x_discrete(labels = c("0", "1"))
+```
 
 ##  Bias and Weakness
 
@@ -613,18 +666,7 @@ The source of the original data set is Lianjia Company, which is a representativ
 ## Diagnosing model
 
 
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: model-lm1
 
-# Fit linear regression model
-lm_model <- lm(price ~ dif_cor, data = cleaned_sampled_data)
-
-# Summary of the model
-summary(lm_model)
-```
 
 
 
