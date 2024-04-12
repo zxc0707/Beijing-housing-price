@@ -29,6 +29,7 @@ library(readr)
 library(dplyr)
 library(dagitty)
 library(gridExtra)
+library(arrow)
 ```
 
 
@@ -49,7 +50,7 @@ Beijing, located in northern China and the capital, has a rich cultural heritage
 This report aims to analyze the degree of housing price differences caused by various housing characteristics from the perspective of hedonic determinants, then use the results to predict the direction of Beijing housing prices in the 21st century based on the late 20th century as the dividing line. Hedonic determinants in this case refer to differences in housing prices due to differences in housing space, materials, and other factors that bring residents experience. [@article7] Here, I hope to find some characteristics that have a clear decisive effect on housing prices and use modeling and sketching to show the order of dominance between 7 properties that affect the price. This perspective of horizontally discussing many potential factors separately according to the particular time points of the 20th century to the 21st century has not been discussed deeply in prior reports and may be of interest to economists, policymakers, and home appraisers. [@article8]
 
 
-Using Kaggle's beta API, information related to Beijing housing prices was collected into a huge data set for analysis. This housing information from 2011 to 2017 was collected and displayed on Lianjia.com, which is a gap in this database because 6 years of data are scarce for studying housing issues. Basic information about each housing such as geographical location, number of bathrooms, etc. are recorded by relevant staff of Lianjia Company using tables. The final dataset used was the result of cleaning and creating new variables based on the existing observations and was analyzed according to my main research purpose.
+Using Kaggle's beta API, information related to Beijing housing prices was collected into a huge data set for analysis. This housing information from 2011 to 2017 was collected and displayed on Lianjia.com, which is a gap in this database because 6 years of data are scarce for studying housing issues. Basic information about each housing such as geographical location, number of bathrooms, etc. are recorded by relevant staff of Lianjia Company using tables. The final dataset used was the result of cleaning and creating new variables based on the existing observations and was analyzed according to my main research purpose.The estimand for this report is the average effect of certain factors such as geographical location coordinates, building type, number of kitchens, and other characteristics on housing prices in Beijing.
 
 
 In the Data section, the data set collected from Kaggle's beta API will be introduced and explain how to clean, place, and create new variables to achieve appropriate analysis. In this section, I will discuss the datasets, variables, and methods used to process the raw data. For the Model part, I will compare the impact of different housing factors on prices under distance distribution. The regression line equation and its impact on the interpretation will be described. Some image sketches are shown to provide necessary explanations and evidence for predicting Beijing housing prices by taking the century junction as a time node in the Result part. Finally, the findings of the number of living rooms, location, and the building structures that are seen as dominant in the surge in housing prices in Beijing will be discussed with implications and shortcomings of this report in the Discussion section. 
@@ -144,28 +145,75 @@ data_details <- data.frame(
   Description = c(
     "Straight-line distance from the center of Beijing in Longitude",
     "Straight-line distance from the center of Beijing in Latitude",
-    "Straight-line distance from the center of Beijing"
-  )
+    "Straight-line distance from the center of Beijing")
 )
 
 # Print the table
-kable(data_details, caption = "Details of New Variables")
+kable(data_details, caption = "Features of New Variables")
 
 ```
 
 
 
-In this research report, I try to use the geographical coordinates given in the data set to determine whether Beijing housing prices are related to the distance from the center of Beijing. The specific method is to take the architectural coordinates of downtown Beijing, which are (39.901996392, 116.38833178)[@cordtian] as the center of the circle. Then create variables "dif_lng" and "dif_lat" by subtracting the center coordinates from the latitude and longitude coordinates given in the data set and taking the absolute values respectively. Then, according to the Pythagorean theorem[@article9], the square root of "dif_lng" and "dif_lat" of each observation is calculated to obtain the straight-line distance between each house and the center of Beijing. Descriptions of the 3 created variables can be found in [@tbl-table3].
+In this research report, I try to use the geographical coordinates given in the data set to determine whether Beijing housing prices are related to the distance from the center of Beijing. The specific method is to take the architectural coordinates of downtown Beijing, which are (39.901996392, 116.38833178)[@cordtian] as the center of the circle. Then create variables "dif_lng" and "dif_lat" by subtracting the center coordinates from the latitude and longitude coordinates given in the data set and taking the absolute values respectively. Then, according to the Pythagorean theorem[@article9], the square root of "dif_lng" and "dif_lat" of each observation is calculated to obtain the straight-line distance between each house and the center of Beijing. Descriptions of the created variables can be found in [@tbl-table3]. 
 
 
-![Beijing city center (39.901996392, 116.38833178) as the center of the circle](/cloud/project/Input/map/beijing_map.png)
-
-
+![Beijing city center (39.901996392, 116.38833178) as the center of the circle](/cloud/project/Other/map/beijing_map.png)
 
 The relationship between variables in the data set is mainly reflected in two aspects. First, there is a positive correlation between the number of various rooms and the price per square, which means that the more the number of living rooms, drawing rooms, kitchens, and bathrooms, the more expensive the price will be. Second, building materials and building types led by the times are related to prices per square. This shows that there is a big difference between the type of combination of plate and tower, which is also made of brick and wood in building structures, before 2000 and after 2000. These two dependencies will be explained in detail in the Result section.
 
 
-All data manipulated and presented in this report were sourced from the datasets [@lianjia] in Kaggle open website. The data processing, and analyzing for this report is using R [@Rproject] along with other support packages tidyverse[@tidyverse], psych[@psych], lubridate[@lubridate], knitr[@knitr], ds4psy[@ds4psy], scales[@scales], ggplot2[@ggplot2], car[@car], stats[@stats], readr[@readr], dplyr[@dplyr], dagitty[@dagitty], gridExtra[@gridExtra].
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-fig0
+#| fig-cap: Summary statistics for different rooms
+
+# Create the first bar plot for living rooms
+plot1 <- ggplot(cleaned_sampled_data, aes(x = factor(livingRoom))) +
+  geom_bar(fill = "#1f77b4") +
+  labs(x = "Number of Living Rooms", y = "Frequency", title = "Frequency of Living Room") +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 11),  # Adjust title size
+        axis.title = element_text(face = "bold", size = 12),  # Adjust axis label size
+        axis.text = element_text(size = 10))  # Adjust axis tick label size
+
+# Create the second bar plot for drawing rooms
+plot2 <- ggplot(cleaned_sampled_data, aes(x = factor(drawingRoom))) +
+  geom_bar(fill = "#FFA500") +
+  labs(x = "Number of Drawing Rooms", y = "Frequency", title = "Frequency of Drawing Room") +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 11),  # Adjust title size
+        axis.title = element_text(face = "bold", size = 12),  # Adjust axis label size
+        axis.text = element_text(size = 10))  # Adjust axis tick label size
+
+# Create the third bar plot for bathrooms
+plot3 <- ggplot(cleaned_sampled_data, aes(x = factor(bathRoom))) +
+  geom_bar(fill = "#87CEEB") +
+  labs(x = "Number of Bathrooms", y = "Frequency", title = "Frequency of Bathroom") +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 11),  # Adjust title size
+        axis.title = element_text(face = "bold", size = 12),  # Adjust axis label size
+        axis.text = element_text(size = 10))  # Adjust axis tick label size
+
+# Create the fourth bar plot for kitchens
+plot4 <- ggplot(cleaned_sampled_data, aes(x = factor(kitchen))) +
+  geom_bar(fill = "#FFA07A") +
+  labs(x = "Number of Kitchens", y = "Frequency", title = "Frequency of Kitchen") +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold", size = 11),  # Adjust title size
+        axis.title = element_text(face = "bold", size = 12),  # Adjust axis label size
+        axis.text = element_text(size = 10))  # Adjust axis tick label size
+
+# Arrange the plots together
+grid.arrange(plot1, plot2, plot3, plot4, ncol = 2)
+```
+
+The measurements in this report mainly perform central tendency, dispersion, and summary statistics on the four-room type variables in the data set, including the number of living rooms, drawing rooms, bathrooms, and kitchens. Different measurements also inspired me to explore the impact of certain rooms on price increases. By [@fig-fig0], for the cleaned data set with a total number of observations of 495, the number of living rooms appears the most in 2 listings, while the situations of 1 and 3 are the same, which makes me want to study more about the relationship between living room quantity and price. Similarly, listings with one drawing room also have a high degree of concentration compared to other situations, and the degree of dispersion is also appropriate. This distribution is also suitable for studying the relationship with price in subsequent work. On the contrary, summary statistics for bathroom and kitchen. Although it has the prominence of a single situation, it lacks dispersion. Such measurement performance makes statistical work meaningless since there are insufficient missing samples in each case. The information on residuals can be found in the Appendix. 
+
+
+All data manipulated and presented in this report were sourced from the datasets [@lianjia] in Kaggle open website. The data processing, and analyzing for this report is using R [@Rproject] along with other support packages tidyverse[@tidyverse], psych[@psych], lubridate[@lubridate], knitr[@knitr], ds4psy[@ds4psy], scales[@scales], ggplot2[@ggplot2], car[@car], stats[@stats], readr[@readr], dplyr[@dplyr], dagitty[@dagitty], gridExtra[@gridExtra], arrow[@arrow].
 
 
 ## Missing Data
@@ -285,7 +333,7 @@ Regarding factors that may affect housing prices in Beijing, the impact of the n
 #| echo: false
 #| warning: false
 #| label: fig-fig1
-
+#| fig-cap: Prices with different number of living room
 
 # Create a new column to indicate whether constructionTime is before or after 2005
 cleaned_sampled_data <- within(cleaned_sampled_data, {
@@ -329,6 +377,7 @@ The [@fig-fig1] describes the relationship between housing prices per square met
 #| echo: false
 #| warning: false
 #| label: fig-fig2
+#| fig-cap: Prices with different number of drawing room
 
 # Create a new column to indicate whether constructionTime is before or after 2000
 cleaned_sampled_data <- within(cleaned_sampled_data, {
@@ -369,6 +418,7 @@ Similarly, it can be clearly observed from the upper and lower distribution [@fi
 #| echo: false
 #| warning: false
 #| label: fig-fig3
+#| fig-cap: Prices with different construction time
 
 # Create a new column to indicate whether constructionTime is before or after 2000
 cleaned_sampled_data <- within(cleaned_sampled_data, {
@@ -403,6 +453,7 @@ Different construction times can also be used as potential factors to affect hou
 #| echo: false
 #| warning: false
 #| label: fig-fig4
+#| fig-cap: Prices with different building type
 
 # Filter data for constructionTime before 2000
 before_2000 <- cleaned_sampled_data[cleaned_sampled_data$constructionTime < 2000, ]
@@ -449,6 +500,7 @@ Through the database studied in this report, only three types of six categories 
 #| echo: false
 #| warning: false
 #| label: fig-fig5
+#| fig-cap: Prices with different building structure
 
 # Create two separate datasets for constructionTime before and after 2000
 before_2000 <- cleaned_sampled_data[cleaned_sampled_data$constructionTime < 2000, ]
@@ -513,6 +565,7 @@ This report takes Beijing housing prices as the research background, with the th
 #| echo: false
 #| warning: false
 #| label: fig-fig6
+#| fig-cap: Prices with different location
 # Create scatter plot with regression line
 ggplot(data = cleaned_sampled_data, aes(x = dif_cor, y = price)) +
   geom_point(color = "blue", alpha = 0.5) +  # Adjust point color and transparency
@@ -530,7 +583,7 @@ ggplot(data = cleaned_sampled_data, aes(x = dif_cor, y = price)) +
 #| echo: false
 #| warning: false
 #| label: fig-fig7
-#| fig-cap: Prices with Different Building types
+#| fig-cap: Prices with different building types model
 # Fit linear regression models for each type of building
 lm_models1 <- lapply(levels(cleaned_sampled_data$buildingType), function(building_type) {
   lm(price ~ dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingType == building_type))
@@ -566,7 +619,7 @@ ggplot(cleaned_sampled_data, aes(x = dif_cor, y = price, color = factor(building
 #| echo: false
 #| warning: false
 #| label: fig-fig8
-#| fig-cap: Prices with Different Building Structure
+#| fig-cap: Prices with different building structure model
 # Fit linear regression models for each type of building structure
 lm_models <- lapply(levels(cleaned_sampled_data$buildingStructure), function(building_structure) {
   lm(price ~  dif_cor + livingRoom + drawingRoom, data = subset(cleaned_sampled_data, buildingStructure == building_structure))
@@ -617,7 +670,7 @@ Lastly, I used a more intuitive data chart to compare the impact of building typ
 #| echo: false
 #| warning: false
 #| label: fig-fig9
-
+#| fig-cap: Prices with elevator or not
 # Create a scatter plot with different colors for each type of elevator
 ggplot(cleaned_sampled_data, aes(x = factor(elevator), y = price, color = factor(elevator))) +
   geom_point(alpha = 0.7) +
@@ -668,6 +721,8 @@ The purpose of this report is to provide some suggestions on economic management
 #| echo: false
 #| warning: false
 #| label: fig-fig10
+#| fig-cap: Influence plot for the first model
+
 # create an influence plot for diagnosing influential cases in linear regression models
 influencePlot(lm_model)
 ```
@@ -680,6 +735,8 @@ Some meaningless outliers during data cleaning can be observed from the influenc
 #| echo: false
 #| warning: false
 #| label: fig-fig11
+#| fig-cap: Residuals for the first model
+
 # calculates the residuals of the linear regression model
 residuals <- residuals(lm_model)
 
@@ -699,6 +756,8 @@ abline(h = 0, col = "red")
 #| echo: false
 #| warning: false
 #| label: fig-fig12
+#| fig-cap: Distribution of residuals for the first model
+
 # Plot the distribution of residuals
 hist(residuals, 
      main = "Distribution of Residuals",

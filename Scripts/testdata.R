@@ -1,6 +1,6 @@
 #### Preamble ####
 # Purpose: Test the codes, simulated data set and the cleaned original data set to be used to ensure the availability of the data set
-# Author: Xincheng Zhang 
+# Author: Xincheng Zhang
 # Date: March 29 2024
 # Contact: xinchenggg.zhang@mail.utoronto.ca
 
@@ -47,14 +47,14 @@ has_missing_data <- anyNA(sampled_data)
 cat("Does the dataset have missing data?:", !has_missing_data, "\n")
 
 # 3. Check if specified columns are not in text form
-numeric_columns <- c("totalPrice", "square", "livingRoom", "drawingRoom", 
-                     "kitchen", "bathRoom", "buildingType", "constructionTime", 
-                     "buildingStructure", "elevator")
+numeric_columns <- c(
+  "totalPrice", "square", "livingRoom", "drawingRoom",
+  "kitchen", "bathRoom", "buildingType", "constructionTime",
+  "buildingStructure", "elevator"
+)
 are_not_text_data <- sapply(sampled_data[numeric_columns], function(x) !any(grepl("[[:alpha:]]", x, ignore.case = TRUE)))
 cat("Are specified columns not in text form?:", all(are_not_text_data), "\n")
 
 ## Test for codes
-## By the cleandata.R and simulationdata.R in the script folder, it can be clearly see that the above code for testing is matching the prperties of simulation_data and sampled_data. 
-## The codes are correct and can be run successfully. 
-
-
+## By the cleandata.R and simulationdata.R in the script folder, it can be clearly see that the above code for testing is matching the prperties of simulation_data and sampled_data.
+## The codes are correct and can be run successfully.

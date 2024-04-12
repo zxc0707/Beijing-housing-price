@@ -1,6 +1,6 @@
 #### Preamble ####
 # Purpose: Clean and collect the raw original data set and ensure the availability for using in each part of report
-# Author: Xincheng Zhang 
+# Author: Xincheng Zhang
 # Date: March 30 2024
 # Contact: xinchenggg.zhang@mail.utoronto.ca
 
@@ -11,10 +11,11 @@
 ## Load the necessary packages
 library(readr)
 library(dplyr)
+library(arrow)
 beijing <- read_csv("/cloud/project/Input/raw_data/beijing.csv")
-# Select the desired columns for using 
-selected_data <- select(beijing, id, Lng, Lat, totalPrice, square, livingRoom, price, drawingRoom, kitchen, bathRoom, constructionTime, buildingType, buildingStructure, elevator) 
-# View the first few rows of the selected columns to check 
+# Select the desired columns for using
+selected_data <- select(beijing, id, Lng, Lat, totalPrice, square, livingRoom, price, drawingRoom, kitchen, bathRoom, constructionTime, buildingType, buildingStructure, elevator)
+# View the first few rows of the selected columns to check
 head(selected_data)
 ## Filter the data that contains other irrelevant symbols
 cleaned_data <- selected_data %>%
@@ -46,7 +47,7 @@ sampled_data <- cleaned_data %>%
 # Order the sampled data by constructionTime from small to big
 sampled_data <- sampled_data[order(sampled_data$constructionTime), ]
 
-# Print the first few rows of the sampled data to check 
+# Print the first few rows of the sampled data to check
 head(sampled_data)
 
 ## For the Model part, create 3 new variables to show the distances with the center of Beijing in coordinates
@@ -77,3 +78,15 @@ write.csv(sampled_data, file = "sampled_data.csv", row.names = FALSE)
 
 
 
+
+## Saving the analysis datasets as parquet files.
+
+# Define the file paths where you want to save the Parquet files
+file_path_cleaned <- "/cloud/project/Input/analysis_data/cleaned_sampled_data.parquet"
+file_path_sampled <- "/cloud/project/Input/analysis_data/sampled_data.parquet"
+
+# Save cleaned_sampled_data as Parquet file
+write_parquet(cleaned_sampled_data, file_path_cleaned)
+
+# Save sampled_data as Parquet file
+write_parquet(sampled_data, file_path_sampled)
