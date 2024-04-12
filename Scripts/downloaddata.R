@@ -19,5 +19,5 @@ library(kaggler)
 
 ## Download datasets from Kaggle
 Beijing_housing <- kgl_datasets_download_all(owner_dataset ="ruiqurm/lianjia")
-download.file(Beijing_housing[["url"]], "input/beijing.csv", mode="wb")
+download.file(Beijing_housing[["url"]], "Input/beijing.csv", mode="wb")
 

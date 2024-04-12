@@ -11,7 +11,7 @@
 ## Load the necessary packages
 library(readr)
 library(dplyr)
-beijing <- read_csv("/cloud/project/input/beijing.csv")
+beijing <- read_csv("/cloud/project/Input/raw_data/beijing.csv")
 # Select the desired columns for using 
 selected_data <- select(beijing, id, Lng, Lat, totalPrice, square, livingRoom, price, drawingRoom, kitchen, bathRoom, constructionTime, buildingType, buildingStructure, elevator) 
 # View the first few rows of the selected columns to check 
@@ -74,5 +74,6 @@ write.csv(cleaned_sampled_data, file = "cleaned_sampled_data.csv", row.names = F
 
 # Save the dataset as a CSV file
 write.csv(sampled_data, file = "sampled_data.csv", row.names = FALSE)
+
 
 
