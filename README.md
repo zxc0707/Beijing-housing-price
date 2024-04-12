@@ -11,7 +11,7 @@ The repo is structured as:
 -  `Model` contains three models used in this report, including the interaction for location, building type, and building structure with price. 
 -  `Output` contains the qmd file and references, as well as the PDF of the paper.
 -  `Scripts` contains the R scripts used to download the raw datasets from Kaggle, simulation, clean and test of the data, as well as the codes that create the models. Using styler to style the codes in `Scripts` is also contained in it. 
--  `other` contains `literature` for the pdf file of all references, `sketching` for sketches for datasets and graphs, `llms` for recording LLM using, `replicated_plots` for recording all graphs in the report, and `map` for the map in the report.
+-  `Other` contains `literature` for the pdf file of all references, `sketching` for sketches for datasets and graphs, `llms` for recording LLM using, `replicated_plots` for recording all graphs in the report, and `map` for the map in the report.
 
 ## Packages Installization
 The codes used to install packages are in `Scripts/downloadpackages.R`.
