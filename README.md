@@ -1,4 +1,4 @@
-# Beijing Housing Price
+# Analyzing and Predicting Beijing Housing Price
 
 ## Overview
 This report uses linear regression equations and statistical charts to analyze the factors that led to the increase in housing prices in Beijing for the 21st century compared to the 20th century. The results show that the number of living rooms, the location of the listings, and the structure of the building are the prime drivers of price surges. This result can play a key role in the economic management and decision-making of potential buyers in Beijing.
