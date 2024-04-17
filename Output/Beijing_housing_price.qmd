@@ -30,6 +30,7 @@ library(dplyr)
 library(dagitty)
 library(gridExtra)
 library(arrow)
+library(kableExtra)
 ```
 
 
@@ -50,7 +51,7 @@ Beijing, located in northern China and the capital, has a rich cultural heritage
 This report aims to analyze the degree of housing price differences caused by various housing characteristics from the perspective of hedonic determinants, then use the results to predict the direction of Beijing housing prices in the 21st century based on the late 20th century as the dividing line. Hedonic determinants in this case refer to differences in housing prices due to differences in housing space, materials, and other factors that bring residents experience. [@article7] Here, I hope to find some characteristics that have a clear decisive effect on housing prices and use modeling and sketching to show the order of dominance between 7 properties that affect the price. This perspective of horizontally discussing many potential factors separately according to the particular time points of the 20th century to the 21st century has not been discussed deeply in prior reports and may be of interest to economists, policymakers, and home appraisers. [@article8]
 
 
-Using Kaggle's beta API, information related to Beijing housing prices was collected into a huge data set for analysis. This housing information from 2011 to 2017 was collected and displayed on Lianjia.com, which is a gap in this database because 6 years of data are scarce for studying housing issues. Basic information about each housing such as geographical location, number of bathrooms, etc. are recorded by relevant staff of Lianjia Company using tables. The final dataset used was the result of cleaning and creating new variables based on the existing observations and was analyzed according to my main research purpose.The estimand for this report is the average effect of certain factors such as geographical location coordinates, building type, number of kitchens, and other characteristics on housing prices in Beijing.
+Using Kaggle's beta API, information related to Beijing housing prices was collected into a huge data set for analysis. This housing information from 2011 to 2017 was collected and displayed on Lianjia.com, which is a gap in this database because 6 years of data are scarce for studying housing issues. Basic information about each housing such as geographical location, number of bathrooms, etc. are recorded by relevant staff of Lianjia Company using tables. The final dataset used was the result of cleaning and creating new variables based on the existing observations and was analyzed according to my main research purpose. The estimand for this report is the average effect of certain factors such as geographical location coordinates, building type, number of kitchens, and other characteristics on housing prices in Beijing.
 
 
 In the Data section, the data set collected from Kaggle's beta API will be introduced and explain how to clean, place, and create new variables to achieve appropriate analysis. In this section, I will discuss the datasets, variables, and methods used to process the raw data. For the Model part, I will compare the impact of different housing factors on prices under distance distribution. The regression line equation and its impact on the interpretation will be described. Some image sketches are shown to provide necessary explanations and evidence for predicting Beijing housing prices by taking the century junction as a time node in the Result part. Finally, the findings of the number of living rooms, location, and the building structures that are seen as dominant in the surge in housing prices in Beijing will be discussed with implications and shortcomings of this report in the Discussion section. 
@@ -91,10 +92,10 @@ data_features <- data.frame(
                   "The number of drawing room", 
                   "The number of kitchen", 
                   "The number of bathroom", 
-                  "4 types of building (1/2/3/4)", 
-                  "6 types of materials (1/2/3/4/5/6)", 
+                  "4 types of building ((1)/(2)/(3)/(4))", 
+                  "6 types of materials ((1)/(2)/(3)/(4)/(5)/(6))", 
                   "The time of construction", 
-                  "whether there is an elevator (1/2)")
+                  "whether there is an elevator ((0)/(1))")
 )
 
 # Print the table
@@ -109,6 +110,9 @@ kable(data_features, caption = "Data Features")
 #| echo: false
 #| warning: false
 #| label: tbl-table2
+
+# Load the required library
+library(kableExtra)
 
 # Define the details for each data feature
 building_type_details <- c("tower(1)", "bungalow(2)", "combination of plate and tower(3)", "plate(4)")
@@ -125,8 +129,9 @@ data_details <- data.frame(
   )
 )
 
-# Print the table
-kable(data_details, caption = "Details of Several Data Features")
+# Print the table with smaller text
+kable(data_details, caption = "Details of Several Data Features") %>%
+  kable_styling(font_size = 9)  # Adjust font size as needed
 
 ```
 
@@ -213,7 +218,7 @@ grid.arrange(plot1, plot2, plot3, plot4, ncol = 2)
 The measurements in this report mainly perform central tendency, dispersion, and summary statistics on the four-room type variables in the data set, including the number of living rooms, drawing rooms, bathrooms, and kitchens. Different measurements also inspired me to explore the impact of certain rooms on price increases. By [@fig-fig0], for the cleaned data set with a total number of observations of 495, the number of living rooms appears the most in 2 listings, while the situations of 1 and 3 are the same, which makes me want to study more about the relationship between living room quantity and price. Similarly, listings with one drawing room also have a high degree of concentration compared to other situations, and the degree of dispersion is also appropriate. This distribution is also suitable for studying the relationship with price in subsequent work. On the contrary, summary statistics for bathroom and kitchen. Although it has the prominence of a single situation, it lacks dispersion. Such measurement performance makes statistical work meaningless since there are insufficient missing samples in each case. The information on residuals can be found in the Appendix. 
 
 
-All data manipulated and presented in this report were sourced from the datasets [@lianjia] in Kaggle open website. The data processing, and analyzing for this report is using R [@Rproject] along with other support packages tidyverse[@tidyverse], psych[@psych], lubridate[@lubridate], knitr[@knitr], ds4psy[@ds4psy], scales[@scales], ggplot2[@ggplot2], car[@car], stats[@stats], readr[@readr], dplyr[@dplyr], dagitty[@dagitty], gridExtra[@gridExtra], arrow[@arrow].
+All data manipulated and presented in this report were sourced from the datasets [@lianjia] in Kaggle open website. The data processing, and analyzing for this report is using R [@Rproject] along with other support packages tidyverse[@tidyverse], psych[@psych], lubridate[@lubridate], knitr[@knitr], ds4psy[@ds4psy], scales[@scales], ggplot2[@ggplot2], car[@car], stats[@stats], readr[@readr], dplyr[@dplyr], dagitty[@dagitty], gridExtra[@gridExtra], arrow[@arrow], kableExtra[@kableExtra].
 
 
 ## Missing Data
@@ -705,7 +710,7 @@ The shortcomings of this report mainly stem from the timeliness of the original 
 
 ## Next Steps
 
-The possible bias situation mentioned above and the problem of the short period in the original data set can be solved through some effective methods. For the former, reviewing the authenticity of each observed listing in the data set is a straightforward way to eliminate bias. The specific steps are to check, for each observation that exists in the cleaned data set, whether each given variable is consistent with what is recorded in the data set. Although this method has a relatively large time cost, it can completely remove biased data. For the latter, leveraging database merging is a preferable approach. After obtaining data sets from Lianjia Company for other periods, each separate small database can be merged into a larger data set containing larger time ranges. This will play a more convincing role in analyzing the factors affecting the surge in housing prices in Beijing and predicting housing price changes in the 21st century compared to a data set of only 6 years. Other variables that affect house prices should also be added to the data set. Because the time and angle of sunlight entering the house through the windows are different at different times, this will affect the residents’ experience in the house [@article15]. The orientation of the house can also be added to the data set as a key variable. Besides, whether there are important landmarks such as subway stations, schools and hospitals near the house is also a decisive factor, that determines the convenience of residents’ access to education and treatment [@article16]. Supermarkets are places that residents frequently visit is also have a significant impact on housing prices in the [@article17]. When verifying the authenticity of housing listings, these new variables can be added to the original data set to more completely determine the factors affecting Beijing housing prices.
+The possible bias situation mentioned above and the problem of the short period in the original data set can be solved through some effective methods. For the former, reviewing the authenticity of each observed listing in the data set is a straightforward way to eliminate bias. The specific steps are to check, for each observation that exists in the cleaned data set, whether each given variable is consistent with what is recorded in the data set. Although this method has a relatively large time cost, it can completely remove biased data. For the latter, leveraging database merging is a preferable approach. After obtaining data sets from Lianjia Company for other periods, each separate small database can be merged into a larger data set containing larger time ranges. This will play a more convincing role in analyzing the factors affecting the surge in housing prices in Beijing and predicting housing price changes in the 21st century compared to a data set of only 6 years. Other variables that affect house prices should also be added to the data set. Because the time and angle of sunlight entering the house through the windows are different at different times, this will affect the residents’ experience in the house [@article15]. The orientation of the house can also be added to the data set as a key variable. Besides, whether there are landmarks such as subway stations, schools and hospitals near the house is also a decisive factor, that determines the convenience of residents’ access to education and treatment [@article16]. Supermarkets are places that residents frequently visit is also have a significant impact on housing prices in the [@article17]. When verifying the authenticity of housing listings, these new variables can be added to the original data set to more completely determine the factors affecting Beijing housing prices.
 
 
 The purpose of this report is to provide some suggestions on economic management and purchase decisions for potential and interested people who want to buy a house in Beijing by analyzing the variables provided by the data set and the price per square meter of the house. As one of the cities with the most prominent housing price growth in China, Beijing is highly representative of this research topic. Compared with the 20th century, this report focuses on three factors that determine the growth trend of Beijing’s housing prices in the 21st century: geographical location, number of living rooms, and building structure. When it comes to choosing a house in Beijing, buyers can estimate the budget they need to prepare for this type of house based on their own household and house type needs, which can be used to consider whether they can save more money by giving up some unnecessary needs. In addition to potential property buyers, economists market analysts and government policymakers will also be interested in the determinants of housing prices in Beijing. For the former, professionals can use the analysis steps and results in the report to understand broader economic trends in the field of Beijing housing prices, which will help predict the direction of real estate. For the latter, the knowledge this report brings to the world will lead to improvements in key housing policies and have a significant impact on policy guidance related to housing affordability, urban transformation, and economic progress.
